@@ -7,6 +7,8 @@ import (
 	"testing"
 )
 
+const TempDirPrefix = "com.bengfort.memfs-"
+
 func TestMemfs(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Memfs Suite")

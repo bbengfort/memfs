@@ -1,0 +1,11 @@
+{
+    "name": "apollo",
+    "replicas": [
+        {
+            "pid": 1,
+            "name": "apollo",
+            "host": "127.0.0.1",
+            "port": 4157
+        }
+    ]
+}
