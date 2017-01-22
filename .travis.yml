@@ -1,0 +1,29 @@
+language: go
+
+go:
+    - 1.7
+
+before_install:
+    - go get github.com/tools/godep
+
+install:
+    - go get -v github.com/onsi/ginkgo/ginkgo
+    - go get -v github.com/onsi/gomega
+    - go get github.com/mattn/goveralls
+    - godep restore
+
+script: ginkgo -r -v -coverpkg=github.com/bbengfort/memfs
+
+after_script:
+    - goveralls -coverprofile=memfs.coverprofile -service=travis-ci -repotoken $COVERALLS_TOKEN
+
+env:
+    global:
+        - secure: yqFzW+ElgxtM/gny4Xamb5vDCAK5TJmbByqM2Rn5+F0lZ6Q9l1WhdbGuFZlv4sGnd8Q87/RsUXdcbL2cS+vSdHB4s9cAktJYaQAJRJICOPBlhTbN/1Th30CjvSSIJ+Z03CZJUkOcQmR5gRe9sXRBoXBhSMP8JIJ6blwB4PofC/bqnKrhUj9kmD7NlozCWHSbwBpHDefg+/GPIUNF8S0AbJk6gV1evPi1YxGSg3+h42bihJIWRdaArlwvV495QVMCEHxMXeUb+H7qAZ8vwotmu8HU2V3nBS49Jyjs84lXfY4OB/0F/g/ESgbXx24OZmgeejfb67esVyrTyBbnu2XPcDK8xuYi7N/4cAN3Jc/vn4XCLxuOc/NS1HOrCYYSogds+bSMLO1oEVwuofuBGadF1HjTuZaaQDxsuYeRjWJB/woe68wC49CjzusIgBMKz0wW4UeA/gwKmwA0TjH0bkBHJZ3c3sr0820wIpUoxI7UPVv4uhS3TS8PtbrWJbL6z+ifrdB3Mm60xTljpygKkx4Q3kvr5cn1/+RwmIX2TDYD4KpTMj9dEakGyKGfGOT4QTzXGupLxVgX5kIDfvkKoRSk+xzd4SArJNl0PW286mLIbxzoffUt6cN5EqcRrv/uLy0MkiHxlafpfZJnVBvcnKtTG7/Umx86nt6YO8O2V+JaF/o=
+
+notifications:
+    email:
+        recipients:
+            - benjamin@bengfort.com
+        on_success: change
+        on_failure: always
