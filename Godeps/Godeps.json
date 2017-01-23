@@ -7,6 +7,22 @@
 	],
 	"Deps": [
 		{
+			"ImportPath": "bazil.org/fuse",
+			"Rev": "371fbbdaa8987b715bdd21d6adc4c9b20155f748"
+		},
+		{
+			"ImportPath": "bazil.org/fuse/fs",
+			"Rev": "371fbbdaa8987b715bdd21d6adc4c9b20155f748"
+		},
+		{
+			"ImportPath": "bazil.org/fuse/fuseutil",
+			"Rev": "371fbbdaa8987b715bdd21d6adc4c9b20155f748"
+		},
+		{
+			"ImportPath": "github.com/bbengfort/sequence",
+			"Rev": "080df07ce9822be9ec99c856f01c1ceafd5cfc5e"
+		},
+		{
 			"ImportPath": "github.com/onsi/ginkgo",
 			"Comment": "v1.2.0-87-g00054c0",
 			"Rev": "00054c0bb96fc880d4e0be1b90937fad438c5290"
@@ -155,6 +171,10 @@
 			"ImportPath": "github.com/urfave/cli",
 			"Comment": "v1.19.1",
 			"Rev": "0bdeddeeb0f650497d603c4ad7b20cfe685682f6"
+		},
+		{
+			"ImportPath": "golang.org/x/net/context",
+			"Rev": "cfae461cedfdcab6e261a26eb77db53695623303"
 		},
 		{
 			"ImportPath": "golang.org/x/sys/unix",

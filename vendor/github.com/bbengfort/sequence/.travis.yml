@@ -1,0 +1,26 @@
+language: go
+
+go:
+    - 1.5
+    - 1.6
+    - 1.7
+    - tip
+
+install:
+    - go get github.com/mattn/goveralls
+
+script: make test
+
+after_script:
+    - goveralls -coverprofile=sequence.coverprofile -service=travis-ci -repotoken $COVERALLS_TOKEN
+
+env:
+    global:
+        - secure: aULdMQtdcXQvqhk8dTSrIW8isqLiBbOR91e2d8FuIrL2doRCRvnB3NazYIlhR26Ud5p8BpKV76uMtFdOX/dKLEAW6Ws46DHjKaKIkxmu/WuZSHAg7amQmKHA/jA895FEEA0aMrMr3TxPq7gVG8RLS5LGUUavSrynkr/dXcSXEgI=
+
+notifications:
+    email:
+        recipients:
+            - benjamin@bengfort.com
+        on_success: change
+        on_failure: always
