@@ -1,5 +1,8 @@
 {
     "name": "apollo",
+    "cachesize": 4295000000,
+    "level": "debug",
+    "readonly": false, 
     "replicas": [
         {
             "pid": 1,

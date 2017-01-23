@@ -77,25 +77,25 @@ type Logger struct {
 // InitLogger creates a Logger object by passing a configuration that contains
 // the minimum log level and an optional path to write the log out to.
 func InitLogger(path string, level string) (*Logger, error) {
-	logger := new(Logger)
-	logger.Level = LevelFromString(level)
+	newLogger := new(Logger)
+	newLogger.Level = LevelFromString(level)
 
 	// If a path is specified create a handle to the writer.
 	if path != "" {
 
 		var err error
-		logger.output, err = os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+		newLogger.output, err = os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 		if err != nil {
 			return nil, err
 		}
 
 	} else {
-		logger.output = os.Stdout
+		newLogger.output = os.Stdout
 	}
 
-	logger.logger = log.New(logger.output, "", 0)
+	newLogger.logger = log.New(newLogger.output, "", 0)
 
-	return logger, nil
+	return newLogger, nil
 }
 
 // Close the logger and any open file handles.

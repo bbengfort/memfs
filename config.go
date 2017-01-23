@@ -21,9 +21,12 @@ type Replica struct {
 
 // Config implements the local configuration directives.
 type Config struct {
-	Name     string     `json:"name"`     // Identifier for replica lists
-	Replicas []*Replica `json:"replicas"` // List of remote replicas in system
-	Path     string     `json:"-"`        // Path the config was loaded from
+	Name      string     `json:"name"`      // Identifier for replica lists
+	CacheSize uint64     `json:"cachesize"` // Maximum amount of memory used
+	Level     string     `json:"level"`     // Minimum level to log at (debug, info, warn, error, critical)
+	ReadOnly  bool       `json:"readonly"`  // Whether or not the FS is read only
+	Replicas  []*Replica `json:"replicas"`  // List of remote replicas in system
+	Path      string     `json:"-"`         // Path the config was loaded from
 }
 
 //===========================================================================
