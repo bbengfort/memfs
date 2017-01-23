@@ -39,9 +39,6 @@ func signalHandler() {
 }
 
 func main() {
-	// Handle interrupts
-	go signalHandler()
-
 	var err error
 	logger, err = memfs.InitLogger("", "INFO")
 	if err != nil {
@@ -94,7 +91,13 @@ func runfs(c *cli.Context) error {
 
 	logger.Info("loaded configuration from %s", cpath)
 
+	// Create the new file system
 	fs = memfs.New(mountPath, config)
+
+	// Handle interrupts
+	go signalHandler()
+
+	// Run the file system
 	if err := fs.Run(); err != nil {
 		return cli.NewExitError(err.Error(), 1)
 	}

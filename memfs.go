@@ -38,6 +38,7 @@ func New(mount string, config *Config) *FileSystem {
 	fs.MountPoint = mount
 	fs.Config = config
 	fs.Sequence, _ = sequence.New()
+	fs.root = &Dir{}
 
 	return fs
 }
@@ -67,6 +68,9 @@ func (mfs *FileSystem) Run() error {
 	// Mount the FS with the specified options
 	if mfs.Conn, err = fuse.Mount(
 		mfs.MountPoint,
+		fuse.VolumeName("MemFS"),
+		fuse.FSName("memfs"),
+		fuse.Subtype("memfs"),
 	); err != nil {
 		return err
 	}
@@ -97,10 +101,6 @@ func (mfs *FileSystem) Shutdown() error {
 		return nil
 	}
 
-	// if err := mfs.Conn.Close(); err != nil {
-	// 	return err
-	// }
-
 	if err := fuse.Unmount(mfs.MountPoint); err != nil {
 		return err
 	}
@@ -114,7 +114,7 @@ func (mfs *FileSystem) Shutdown() error {
 
 // Root returns the root directory
 func (mfs *FileSystem) Root() (fs.Node, error) {
-	return Dir{}, nil
+	return mfs.root, nil
 }
 
 //===========================================================================
