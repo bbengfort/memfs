@@ -45,6 +45,7 @@ func (n *Node) Init(name string, mode os.FileMode, parent *Dir, fs *FileSystem) 
 	n.ID, _ = fs.Sequence.Next()
 	n.Name = name
 	n.Parent = parent
+	n.XAttrs = make(XAttr)
 	n.fs = fs
 
 	// Manage the fuse.Attr properties

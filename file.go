@@ -230,6 +230,6 @@ func (f *File) Write(ctx context.Context, req *fuse.WriteRequest, resp *fuse.Wri
 	// Set the attributes on the response
 	resp.Size = int(wlen)
 
-	logger.Info("wrote %d bytes offset by %d to file %d", wlen, off, f.ID)
+	logger.Debug("wrote %d bytes offset by %d to file %d", wlen, off, f.ID)
 	return nil
 }
