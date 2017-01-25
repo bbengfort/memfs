@@ -13,7 +13,7 @@ const (
 // String Helpers
 //===========================================================================
 
-// Regularize a string for comparision, e.g. make all lowercase and trim
+// Regularize a string for comparison, e.g. make all lowercase and trim
 // whitespace. This utility is often used on user input to compare to constant
 // strings like database drivers or hashing algorithm names.
 func Regularize(value string) string {

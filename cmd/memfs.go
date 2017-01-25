@@ -17,7 +17,7 @@ var fs *memfs.FileSystem
 //===========================================================================
 
 func signalHandler() {
-	// Make signal channel and register notifiers for Interupt and Terminate
+	// Make signal channel and register notifiers for Interrupt and Terminate
 	sigchan := make(chan os.Signal, 1)
 	signal.Notify(sigchan, os.Interrupt)
 	signal.Notify(sigchan, syscall.SIGTERM)

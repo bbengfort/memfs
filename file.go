@@ -116,7 +116,7 @@ func (f *File) ReadAll(ctx context.Context) ([]byte, error) {
 
 	// Return the data with no error.
 	logger.Debug("read all file %d", f.ID)
-	return f.Data, nil
+	return f.Data[:f.Attrs.Size], nil
 }
 
 // Read requests to read data from the handle.
@@ -218,6 +218,7 @@ func (f *File) Write(ctx context.Context, req *fuse.WriteRequest, resp *fuse.Wri
 
 	// Set the attributes on the file
 	// TODO: What if the size of the data (lim) <= olen? Should we truncate?
+	// NOTE: Read and ReadAll only return data up to the size in the attrs.
 	f.Attrs.Mtime = time.Now()
 
 	// Set the attributes on the response

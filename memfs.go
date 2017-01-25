@@ -19,7 +19,7 @@ const (
 	programName  = "memfs"
 	majorVersion = 0
 	minorVersion = 2
-	microVersion = 0
+	microVersion = 1
 	releaseLevel = "final"
 	minBlockSize = uint64(512)
 )
