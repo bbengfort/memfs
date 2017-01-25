@@ -1,12 +1,12 @@
 {
-    "name": "apollo",
+    "name": "hostname",
     "cachesize": 4295000000,
     "level": "info",
     "readonly": false,
     "replicas": [
         {
             "pid": 1,
-            "name": "apollo",
+            "name": "hostname",
             "host": "127.0.0.1",
             "port": 4157
         }

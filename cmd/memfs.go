@@ -11,7 +11,6 @@ import (
 )
 
 var fs *memfs.FileSystem
-var logger *memfs.Logger
 
 //===========================================================================
 // OS Signal Handlers
@@ -33,18 +32,12 @@ func signalHandler() {
 	err := fs.Shutdown()
 	if err != nil {
 		msg := fmt.Sprintf("shutdown error: %s", err.Error())
-		logger.Fatal(msg)
+		fmt.Println(msg)
 		os.Exit(1)
 	}
 }
 
 func main() {
-	var err error
-	logger, err = memfs.InitLogger("", "INFO")
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
 
 	app := cli.NewApp()
 	app.Name = "memfs"
@@ -56,8 +49,23 @@ func main() {
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
 			Name:  "config, c",
-			Value: "conf/memfs.json",
 			Usage: "specify a path to the configuration `FILE`",
+		},
+		cli.StringFlag{
+			Name:  "name, N",
+			Usage: "specify name of host, uses os hostname by default",
+		},
+		cli.Uint64Flag{
+			Name:  "cache, C",
+			Usage: "specify maximum cache size in bytes, 4GB by default",
+		},
+		cli.StringFlag{
+			Name:  "level, L",
+			Usage: "specify minimum log level, INFO by default",
+		},
+		cli.BoolFlag{
+			Name:  "readonly, R",
+			Usage: "set the fs to read only mode, false by default",
 		},
 	}
 
@@ -68,28 +76,40 @@ func main() {
 
 func runfs(c *cli.Context) error {
 
+	var err error
 	var mountPath string
 	var config *memfs.Config
 
-	// Get the mount path from the arguments
+	// Validate the arguments
 	if c.NArg() != 1 {
 		return cli.NewExitError("please supply the path to the mount point", 1)
 	}
 
+	// Get the mount path from the arguments
 	mountPath = c.Args()[0]
 
-	// Load the configuration from the flag
+	// Create the configuration from the passed in file or with defaults
 	cpath := c.String("config")
-	if cpath == "" {
-		return cli.NewExitError("please supply the path to a configuration file", 1)
-	}
-
-	config = new(memfs.Config)
-	if err := config.Load(cpath); err != nil {
+	if config, err = makeConfig(cpath); err != nil {
 		return cli.NewExitError(err.Error(), 1)
 	}
 
-	logger.Info("loaded configuration from %s", cpath)
+	// Update the configuration with command line options
+	if c.String("name") != "" {
+		config.Name = c.String("name")
+	}
+
+	if c.Uint64("cache") != 0 {
+		config.CacheSize = c.Uint64("cache")
+	}
+
+	if c.String("level") != "" {
+		config.Level = c.String("level")
+	}
+
+	if c.Bool("readonly") {
+		config.ReadOnly = c.Bool("readonly")
+	}
 
 	// Create the new file system
 	fs = memfs.New(mountPath, config)
@@ -103,4 +123,32 @@ func runfs(c *cli.Context) error {
 	}
 
 	return nil
+}
+
+// Helper function to make the configuration.
+func makeConfig(cpath string) (*memfs.Config, error) {
+	// Construct configuration from command line options or JSON file.
+	config := new(memfs.Config)
+
+	// Load the configuration if a path was passed in.
+
+	if cpath != "" {
+		if err := config.Load(cpath); err != nil {
+			return nil, err
+		}
+	} else {
+		name, err := os.Hostname()
+		if err != nil {
+			name = "terp"
+		}
+
+		// Add reasonable defaults to the configuration
+		config.Name = name
+		config.CacheSize = uint64(4295000000)
+		config.Level = "info"
+		config.ReadOnly = false
+		config.Replicas = make([]*memfs.Replica, 0, 0)
+	}
+
+	return config, nil
 }

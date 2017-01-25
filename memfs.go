@@ -1,5 +1,5 @@
 // Package memfs implements an in-memory replicated file system with Bazil
-// FUSE and anti-entropy replication with gRPC communication.
+// FUSE and whose primary purpose is to implement all FUSE interfaces.
 package memfs
 
 import (
@@ -18,7 +18,7 @@ import (
 const (
 	programName  = "memfs"
 	majorVersion = 0
-	minorVersion = 1
+	minorVersion = 2
 	microVersion = 0
 	releaseLevel = "final"
 	minBlockSize = uint64(512)

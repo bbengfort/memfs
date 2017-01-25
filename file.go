@@ -99,13 +99,6 @@ func (f *File) Flush(ctx context.Context, req *fuse.FlushRequest) error {
 		return fuse.EPERM
 	}
 
-	f.fs.Lock()
-	defer f.fs.Unlock()
-
-	// Update the file access times
-	f.Attrs.Atime = time.Now()
-	f.Attrs.Mtime = f.Attrs.Atime
-
 	logger.Debug("flush file %d", f.ID)
 	return nil
 }
