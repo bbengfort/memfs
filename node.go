@@ -10,6 +10,7 @@ import (
 	"golang.org/x/net/context"
 
 	"bazil.org/fuse"
+	"bazil.org/fuse/fs"
 )
 
 //===========================================================================
@@ -30,6 +31,10 @@ type Entity interface {
 }
 
 // Node contains shared data and structures for both files and directories.
+// Methods returning Node should take care to return the same Node when the
+// result is logically the same instance. Without this, each Node will get a
+// new NodeID, causing spurious cache invalidations, extra lookups and
+// aliasing anomalies. This may not matter for a simple, read-only filesystem.
 type Node struct {
 	ID     uint64      // Unique ID of the Node
 	Name   string      // Name of the Node
@@ -115,21 +120,6 @@ func (n *Node) String() string {
 // Node Interface
 //===========================================================================
 
-// Access checks whether the calling context has permission for
-// the given operations on the receiver. If so, Access should
-// return nil. If not, Access should return EPERM.
-//
-// Note that this call affects the result of the access(2) system
-// call but not the open(2) system call. If Access is not
-// implemented, the Node behaves as if it always returns nil
-// (permission granted), relying on checks in Open instead.
-//
-// https://godoc.org/bazil.org/fuse/fs#NodeAccesser
-func (n *Node) Access(ctx context.Context, req *fuse.AccessRequest) error {
-	logger.Debug("access called on node %d", n.ID)
-	return nil // Permission always granted, relying on checks in Open.
-}
-
 // Attr fills attr with the standard metadata for the node.
 //
 // Fields with reasonable defaults are prepopulated. For example,
@@ -157,6 +147,21 @@ func (n *Node) Attr(ctx context.Context, attr *fuse.Attr) error {
 	attr.Flags = n.Attrs.Flags         // chflags(2) flags (OS X only)
 	attr.BlockSize = n.Attrs.BlockSize // preferred blocksize for filesystem I/O
 	return nil
+}
+
+// Access checks whether the calling context has permission for
+// the given operations on the receiver. If so, Access should
+// return nil. If not, Access should return EPERM.
+//
+// Note that this call affects the result of the access(2) system
+// call but not the open(2) system call. If Access is not
+// implemented, the Node behaves as if it always returns nil
+// (permission granted), relying on checks in Open instead.
+//
+// https://godoc.org/bazil.org/fuse/fs#NodeAccesser
+func (n *Node) Access(ctx context.Context, req *fuse.AccessRequest) error {
+	logger.Debug("access called on node %d", n.ID)
+	return nil // Permission always granted, relying on checks in Open.
 }
 
 // Forget about this node. This node will not receive further method calls.
@@ -216,6 +221,30 @@ func (n *Node) Listxattr(ctx context.Context, req *fuse.ListxattrRequest, resp *
 	}
 
 	return nil
+}
+
+// Open opens the receiver. After a successful open, a client
+// process has a file descriptor referring to this Handle.
+//
+// Open can also be also called on non-files. For example,
+// directories are Opened for ReadDir or fchdir(2).
+//
+// If this method is not implemented, the open will always
+// succeed, and the Node itself will be used as the Handle.
+//
+// https://godoc.org/bazil.org/fuse/fs#NodeOpener
+func (n *Node) Open(ctx context.Context, req *fuse.OpenRequest, resp *fuse.OpenResponse) (fs.Handle, error) {
+	// Log when files are opened (e.g. don't worry about ls on dirs)
+	if !req.Dir {
+		if !n.IsDir() {
+			logger.Info("opened file %d as %s", n.ID, req.Flags.String())
+		} else {
+			logger.Debug("(error) opened dir %d as a file", n.ID)
+		}
+	}
+
+	// Return the node itself as the handle.
+	return n, nil
 }
 
 // Removexattr removes an extended attribute for the name.

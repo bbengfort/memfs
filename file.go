@@ -19,7 +19,8 @@ import (
 // not chunked or broken up until transport.
 type File struct {
 	Node
-	Data []byte // Actual data contained by the File
+	Data  []byte // Actual data contained by the File
+	dirty bool   // If data has been written but not flushed
 }
 
 // Init the file and create the data array
@@ -96,11 +97,23 @@ func (f *File) Fsync(ctx context.Context, req *fuse.FsyncRequest) error {
 //
 // https://godoc.org/bazil.org/fuse/fs#HandleFlusher
 func (f *File) Flush(ctx context.Context, req *fuse.FlushRequest) error {
+	logger.Info("flush file %d (dirty: %t, contains %d bytes with size %d)", f.ID, f.dirty, len(f.Data), f.Attrs.Size)
+
 	if f.IsArchive() || f.fs.readonly {
 		return fuse.EPERM
 	}
 
-	logger.Debug("flush file %d", f.ID)
+	f.fs.Lock()
+	defer f.fs.Unlock()
+
+	if !f.dirty {
+		return nil
+	}
+
+	f.Attrs.Atime = time.Now()
+	f.Attrs.Mtime = f.Attrs.Atime
+	f.dirty = false
+
 	return nil
 }
 
@@ -206,24 +219,23 @@ func (f *File) Write(ctx context.Context, req *fuse.WriteRequest, resp *fuse.Wri
 
 		copy(buf[0:to], f.Data[0:to])
 		f.Data = buf
-	}
 
-	// Update the file system state
-	f.fs.nbytes += lim - olen
+		// Update the size attributes of the file
+		f.Attrs.Size = lim
+		f.Attrs.Blocks = Blocks(f.Attrs.Size)
+
+		// Update the file system state
+		f.fs.nbytes += lim - olen
+	}
 
 	// Copy the data from the request into our data buffer
 	copy(f.Data[off:lim], req.Data[:])
 
-	// Truncate data exactly to the limit
-	f.Data = f.Data[:lim]
-
-	// Set the attributes on the file
-	f.Attrs.Mtime = time.Now()
-	f.Attrs.Size = lim
-	f.Attrs.Blocks = Blocks(f.Attrs.Size)
-
 	// Set the attributes on the response
 	resp.Size = int(wlen)
+
+	// Mark the file as dirty
+	f.dirty = true
 
 	logger.Debug("wrote %d bytes offset by %d to file %d", wlen, off, f.ID)
 	return nil

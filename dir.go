@@ -185,6 +185,8 @@ func (d *Dir) Remove(ctx context.Context, req *fuse.RemoveRequest) error {
 		d.fs.nfiles--
 	}
 
+	// Log the directory removal and return no error
+	logger.Info("removed %q from %q", req.Name, d.Path())
 	return nil
 }
 
@@ -288,7 +290,6 @@ func (d *Dir) Lookup(ctx context.Context, name string) (fs.Node, error) {
 //
 // https://godoc.org/bazil.org/fuse/fs#HandleReadDirAller
 func (d *Dir) ReadDirAll(ctx context.Context) ([]fuse.Dirent, error) {
-	logger.Debug("read all for directory %s", d.Path())
 	contents := make([]fuse.Dirent, 0, len(d.Children))
 
 	d.fs.Lock()
@@ -309,5 +310,6 @@ func (d *Dir) ReadDirAll(ctx context.Context) ([]fuse.Dirent, error) {
 		contents = append(contents, dirent)
 	}
 
+	logger.Debug("read all for directory %s", d.Path())
 	return contents, nil
 }
