@@ -10,7 +10,6 @@ import (
 	"golang.org/x/net/context"
 
 	"bazil.org/fuse"
-	"bazil.org/fuse/fs"
 )
 
 //===========================================================================
@@ -233,19 +232,20 @@ func (n *Node) Listxattr(ctx context.Context, req *fuse.ListxattrRequest, resp *
 // succeed, and the Node itself will be used as the Handle.
 //
 // https://godoc.org/bazil.org/fuse/fs#NodeOpener
-func (n *Node) Open(ctx context.Context, req *fuse.OpenRequest, resp *fuse.OpenResponse) (fs.Handle, error) {
-	// Log when files are opened (e.g. don't worry about ls on dirs)
-	if !req.Dir {
-		if !n.IsDir() {
-			logger.Info("opened file %d as %s", n.ID, req.Flags.String())
-		} else {
-			logger.Debug("(error) opened dir %d as a file", n.ID)
-		}
-	}
-
-	// Return the node itself as the handle.
-	return n, nil
-}
+// TODO: Implement
+// func (n *Node) Open(ctx context.Context, req *fuse.OpenRequest, resp *fuse.OpenResponse) (fs.Handle, error) {
+// 	// Log when files are opened (e.g. don't worry about ls on dirs)
+// 	if !req.Dir {
+// 		if !n.IsDir() {
+// 			logger.Info("opened file %d as %s", n.ID, req.Flags.String())
+// 		} else {
+// 			logger.Debug("(error) opened dir %d as a file", n.ID)
+// 		}
+// 	}
+//
+// 	// Return the node itself as the handle.
+// 	return n, nil
+// }
 
 // Removexattr removes an extended attribute for the name.
 //

@@ -98,21 +98,6 @@ var _ = Describe("Files", func() {
 			Ω(file.Data).Should(Equal(data[:1056]))
 		})
 
-		It("should return all data on read all", func() {
-			file := new(File)
-			file.Init("test.txt", 0644, root, fs)
-
-			data := []byte(randString(4107))
-			file.Data = data
-			file.Attrs.Size = 4107
-
-			ctx := context.TODO()
-			resp, err := file.ReadAll(ctx)
-			Ω(err).ShouldNot(HaveOccurred())
-			Ω(resp).Should(Equal(data))
-
-		})
-
 		It("should return part of the data on read", func() {
 			file := new(File)
 			file.Init("test.txt", 0644, root, fs)
@@ -209,8 +194,6 @@ var _ = Describe("Files", func() {
 			err := file.Write(ctx, req, resp)
 			Ω(err).ShouldNot(HaveOccurred())
 
-			Ω(file.ReadAll(ctx)).Should(Equal(data))
-
 			rreq := &fuse.ReadRequest{
 				Offset: 0, Size: 4107,
 			}
@@ -243,10 +226,6 @@ var _ = Describe("Files", func() {
 			Ω(file.Data).Should(Equal(data))
 			Ω(file.Attrs.Size).Should(Equal(uint64(8192)))
 			Ω(file.Attrs.Blocks).Should(Equal(uint64(16)))
-
-			radat, err := file.ReadAll(ctx)
-			Ω(err).ShouldNot(HaveOccurred())
-			Ω(radat).Should(Equal(data))
 		})
 
 		It("should be able to overwrite data", func() {

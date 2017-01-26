@@ -81,6 +81,9 @@ func (f *File) Setattr(ctx context.Context, req *fuse.SetattrRequest, resp *fuse
 //
 // https://godoc.org/bazil.org/fuse/fs#NodeFsyncer
 func (f *File) Fsync(ctx context.Context, req *fuse.FsyncRequest) error {
+	f.fs.Lock()
+	defer f.fs.Unlock()
+
 	logger.Debug("fsync on file %d", f.ID)
 	return nil
 }
@@ -120,18 +123,23 @@ func (f *File) Flush(ctx context.Context, req *fuse.FlushRequest) error {
 // ReadAll the data from a file. Implements HandleReadAller which has no
 // associated documentation.
 //
+// Note that if ReadAll is implemented it supersedes Read() and should only
+// be implemented as a convenience for applications that do not need to do
+// offset reads.
+//
 // https://godoc.org/bazil.org/fuse/fs#HandleReadAller
-func (f *File) ReadAll(ctx context.Context) ([]byte, error) {
-	f.fs.Lock()
-	defer f.fs.Unlock()
-
-	// Set the access time on the file.
-	f.Attrs.Atime = time.Now()
-
-	// Return the data with no error.
-	logger.Debug("read all file %d", f.ID)
-	return f.Data, nil
-}
+// NOTE: Do not implement
+// func (f *File) ReadAll(ctx context.Context) ([]byte, error) {
+// 	f.fs.Lock()
+// 	defer f.fs.Unlock()
+//
+// 	// Set the access time on the file.
+// 	f.Attrs.Atime = time.Now()
+//
+// 	// Return the data with no error.
+// 	logger.Debug("read all file %d", f.ID)
+// 	return f.Data, nil
+// }
 
 // Read requests to read data from the handle.
 //
@@ -167,10 +175,10 @@ func (f *File) Read(ctx context.Context, req *fuse.ReadRequest, resp *fuse.ReadR
 // Release the handle to the file. No associated documentation.
 //
 // https://godoc.org/bazil.org/fuse/fs#HandleReleaser
-func (f *File) Release(ctx context.Context, req *fuse.ReleaseRequest) error {
-	logger.Debug("release handle on file %d", f.ID)
-	return nil
-}
+// func (f *File) Release(ctx context.Context, req *fuse.ReleaseRequest) error {
+// 	logger.Debug("release handle on file %d", f.ID)
+// 	return nil
+// }
 
 // Write requests to write data into the handle at the given offset.
 // Store the amount of data written in resp.Size.

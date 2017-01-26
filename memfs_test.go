@@ -9,7 +9,7 @@ import (
 
 var _ = Describe("MemFS Package", func() {
 
-	const ExpectedVersion = "0.2.3"
+	const ExpectedVersion = "0.2.4"
 
 	It("should have the right version", func() {
 		Ω(PackageVersion()).Should(Equal(ExpectedVersion))
