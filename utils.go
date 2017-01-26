@@ -88,3 +88,17 @@ func MaxUInt64(values ...uint64) uint64 {
 	}
 	return max
 }
+
+// Blocks returns the number of 512 byte blocks required
+func Blocks(value uint64) uint64 {
+	if value == 0 {
+		return 0
+	}
+
+	blocks := value / minBlockSize
+	if value%minBlockSize > 0 {
+		return blocks + 1
+	}
+
+	return blocks
+}

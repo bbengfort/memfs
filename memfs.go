@@ -19,7 +19,7 @@ const (
 	programName  = "memfs"
 	majorVersion = 0
 	minorVersion = 2
-	microVersion = 1
+	microVersion = 2
 	releaseLevel = "final"
 	minBlockSize = uint64(512)
 )
@@ -193,10 +193,7 @@ func (mfs *FileSystem) Statfs(ctx context.Context, req *fuse.StatfsRequest, resp
 	resp.Blocks = mfs.Config.CacheSize / minBlockSize
 
 	// Compute the number of used blocks
-	numblocks := mfs.nbytes / minBlockSize
-	if mfs.nbytes%minBlockSize > 0 {
-		numblocks++
-	}
+	numblocks := Blocks(mfs.nbytes)
 
 	// Report the number of free and available blocks for the block size
 	resp.Bfree = resp.Blocks - numblocks

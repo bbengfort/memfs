@@ -110,6 +110,19 @@ var _ = Describe("Utils", func() {
 
 		})
 
+		It("should compute the number of blocks", func() {
+			testCases := []struct {
+				value  uint64
+				blocks uint64
+			}{
+				{0, 0}, {256, 1}, {512, 1}, {524, 2}, {1024, 2}, {1256, 3},
+			}
+
+			for _, tt := range testCases {
+				Ω(Blocks(tt.value)).Should(Equal(tt.blocks))
+			}
+		})
+
 	})
 
 })

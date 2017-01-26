@@ -64,7 +64,8 @@ func (f *File) Setattr(ctx context.Context, req *fuse.SetattrRequest, resp *fuse
 		f.fs.Lock() // Only lock if we're going to change the size.
 
 		f.Attrs.Size = req.Size
-		f.Data = f.Data[:req.Size]
+		f.Attrs.Blocks = Blocks(f.Attrs.Size)
+		f.Data = f.Data[:req.Size] // If size > len(f.Data) then panic!
 		logger.Debug("truncate size from %d to %d on file %d", f.Attrs.Size, req.Size, f.ID)
 
 		f.fs.Unlock() // Must unlock before Node.Setattr is called!
@@ -116,7 +117,7 @@ func (f *File) ReadAll(ctx context.Context) ([]byte, error) {
 
 	// Return the data with no error.
 	logger.Debug("read all file %d", f.ID)
-	return f.Data[:f.Attrs.Size], nil
+	return f.Data, nil
 }
 
 // Read requests to read data from the handle.
@@ -205,21 +206,21 @@ func (f *File) Write(ctx context.Context, req *fuse.WriteRequest, resp *fuse.Wri
 
 		copy(buf[0:to], f.Data[0:to])
 		f.Data = buf
-
-		// Update the attrs on the file
-		f.Attrs.Size = lim
-
-		// Update the file system state
-		f.fs.nbytes += lim - olen
 	}
+
+	// Update the file system state
+	f.fs.nbytes += lim - olen
 
 	// Copy the data from the request into our data buffer
 	copy(f.Data[off:lim], req.Data[:])
 
+	// Truncate data exactly to the limit
+	f.Data = f.Data[:lim]
+
 	// Set the attributes on the file
-	// TODO: What if the size of the data (lim) <= olen? Should we truncate?
-	// NOTE: Read and ReadAll only return data up to the size in the attrs.
 	f.Attrs.Mtime = time.Now()
+	f.Attrs.Size = lim
+	f.Attrs.Blocks = Blocks(f.Attrs.Size)
 
 	// Set the attributes on the response
 	resp.Size = int(wlen)

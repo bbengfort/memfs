@@ -63,7 +63,7 @@ func (n *Node) Init(name string, mode os.FileMode, parent *Dir, fs *FileSystem) 
 	n.Attrs.Gid = fs.gid // group gid
 	// n.Attrs.Rdev = 0      // device numbers
 	// n.Attrs.Flags = 0     // chflags(2) flags (OS X only)
-	// n.Attrs.BlockSize = 0 // preferred blocksize for filesystem I/O
+	n.Attrs.BlockSize = uint32(minBlockSize)
 
 	logger.Info("initialized node %d, %q", n.ID, n.Name)
 }
